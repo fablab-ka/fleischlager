@@ -1,9 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import openerplib
 from pprint import pprint
 
 hostname = "erp.fablab-karlsruhe.de"
 database = "FabLab_Karlsruhe"
-
+username = "fleischlager"
+password = "fleischlager"
 
 class Inventory:
 
@@ -11,6 +15,7 @@ class Inventory:
 		self.connection = openerplib.get_connection(hostname=hostname, database=database, login=user, password=pwd, port=80)
 		self.product_model = self.connection.get_model("product.product")
 		self.user_model = self.connection.get_model("res.users")
+		self.stock_change_product_qty = self.connection.get_model("stock.change.product.qty")
 
 		self.relevant_fields = {
 			"product": [ 'name', 'default_code', 'type', 'qty_available', 'loc_case', 'loc_rack', 'loc_row', 'ean13', 'list_price' ],
@@ -26,7 +31,7 @@ class Inventory:
 		return user_info
 
 	def searchProduct(self, description):
-		ids = self.product_model.search([("description", "=", description)])
+		ids = self.product_model.search([("name", "=", description)])
 		return ids
 
 	def getProduct(self, id):
@@ -40,6 +45,14 @@ class Inventory:
 			product = self.getProduct(id)
 			result.append(product)
 		return result
+	
+	def changeProductQuantity(self, product_id, qty):
+		data = {
+			"product_id": product_id,
+			"location_id": 1,
+			"new_quantity": 2
+		}
+		self.stock_change_product_qty.change_product_qty(data)
 
 	def addProduct(self, name, qty=1, case="", rack="", row=""):
 		count = len(self.product_model.search([]))
@@ -55,15 +68,19 @@ class Inventory:
 			#'list_price': 0
 		}
 		product_id = self.product_model.create(data)
+		if qty > 0:
+			self.changeProductQuantity(product_id, qty)
+			
 		return product_id
 
 #SAMPLE CODE
 if False:
 	print "init inventory connection"
-	inventory = Inventory('FabLab_Karlsruhe', '<INSERT-USERNAME-HERE>', '<INSERT-PASSWORD-HERE>')
-	print "searching users"
-	print inventory.searchUser("admin")
-	print "adding products"
-	inventory.addProduct('Digitalmultimerter MM 31')
-	products = inventory.getProducts()
-	pprint(products)
+	inventory = Inventory('FabLab_Karlsruhe', username, password)
+	print "searching product"
+	product_id = inventory.searchProduct("Gliedermaßstab")[0]
+	print product_id
+	print "changing qty"
+	inventory.changeProductQuantity(product_id, 4)
+	#products = inventory.getProducts()
+	#pprint(products)
