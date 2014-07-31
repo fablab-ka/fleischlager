@@ -12,6 +12,7 @@
     <string name="error_nfc_not_supported">This device doesn\'t support NFC</string>
     <string name="state_nfc_disabled">NFC is disabled.</string>
     <string name="state_nothing_selected">Nothing selected</string>
+    <string name="state_wrong_tag_type">Tag is written by Fleischlager</string>
 
 
 </resources>

@@ -32,9 +32,13 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.ndeftools.Record;
+import org.ndeftools.externaltype.AndroidApplicationRecord;
+import org.ndeftools.wellknown.TextRecord;
 import org.w3c.dom.Text;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -133,63 +137,38 @@ public class Inventory extends Activity
         String action = intent.getAction();
 
         if (intent.hasExtra(NfcAdapter.EXTRA_TAG)) {
-            vibrate();
 
             byte[] byteArrayExtra = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
 
             Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
             if (messages != null) {
-                Log.d(TAG, "Found " + messages.length + " NDEF messages");
+                vibrate();
 
                 NdefMessage ndefMessage = (NdefMessage)messages[0];
 
                 try {
-
                     NdefRecord[] records = ndefMessage.getRecords();
 
                     for(int k = 0; k < records.length; k++) {
-                        NdefRecord record = records[k];
+                        Record record = Record.parse(records[k]);
 
                         Log.d(TAG, " Record #" + k + " is of class " + record.getClass().getName());
 
-                        // TODO: add breakpoint or log statement and inspect record.
+                        if(record instanceof AndroidApplicationRecord) {
+                            AndroidApplicationRecord aar = (AndroidApplicationRecord)record;
+                            Log.d(TAG, "Package is " + aar.getPackageName());
+
+                            if (aar.getPackageName() != "de.fablabka.apps.fleischlager") {
+                                mStateLabel.setText(R.string.state_wrong_tag_type);
+                            }
+                        } else if (record instanceof TextRecord) {
+                            TextRecord tr = (TextRecord)record;
+                            Log.d(TAG, "Content is " + tr.getText());
+                            mStateLabel.setText("product id: " + tr.getText());
+                        }
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Problem parsing message", e);
-                }
-            }
-
-            String type = intent.getType();
-            if (MIME_TEXT_PLAIN.equals(type)) {
-
-                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                new NdefReaderTask().execute(tag);
-
-            } else {
-                Log.d(TAG, "Wrong mime type: " + type);
-            }
-        } else if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
-
-            String type = intent.getType();
-            if (MIME_TEXT_PLAIN.equals(type)) {
-
-                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                new NdefReaderTask().execute(tag);
-
-            } else {
-                Log.d(TAG, "Wrong mime type: " + type);
-            }
-        } else if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)) {
-
-            // In case we would still use the Tech Discovered Intent
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            String[] techList = tag.getTechList();
-            String searchedTech = Ndef.class.getName();
-
-            for (String tech : techList) {
-                if (searchedTech.equals(tech)) {
-                    new NdefReaderTask().execute(tag);
-                    break;
                 }
             }
         }
@@ -201,25 +180,6 @@ public class Inventory extends Activity
     }
 
     public void setupForegroundDispatch() {
-        Log.d(TAG, "enableForegroundMode");
-
-        //final Intent intent = new Intent(activity.getApplicationContext(), activity.getClass());
-        //intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        //final PendingIntent pendingIntent = PendingIntent.getActivity(activity.getApplicationContext(), 0, intent, 0);
-
-        /*IntentFilter[] filters = new IntentFilter[1];
-        String[][] techList = new String[][]{};
-
-        filters[0] = new IntentFilter();
-        filters[0].addAction(NfcAdapter.ACTION_NDEF_DISCOVERED);
-        filters[0].addCategory(Intent.CATEGORY_DEFAULT);
-        try {
-            filters[0].addDataType(MIME_TEXT_PLAIN);
-        } catch (IntentFilter.MalformedMimeTypeException e) {
-            throw new RuntimeException("Check your mime type.");
-        }*/
-
         IntentFilter tagDetected = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
         IntentFilter[] writeTagFilters = new IntentFilter[] {tagDetected};
 
@@ -275,75 +235,6 @@ public class Inventory extends Activity
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-
-    /**
-     * Background task for reading the data. Do not block the UI thread while reading.
-     *
-     * @author Ralf Wondratschek
-     *
-     */
-    public class NdefReaderTask extends AsyncTask<Tag, Void, String> {
-
-        @Override
-        protected String doInBackground(Tag... params) {
-            Tag tag = params[0];
-
-            Ndef ndef = Ndef.get(tag);
-            if (ndef == null) {
-                // NDEF is not supported by this Tag.
-                return null;
-            }
-
-            NdefMessage ndefMessage = ndef.getCachedNdefMessage();
-
-            NdefRecord[] records = ndefMessage.getRecords();
-            for (NdefRecord ndefRecord : records) {
-                if (ndefRecord.getTnf() == NdefRecord.TNF_WELL_KNOWN && Arrays.equals(ndefRecord.getType(), NdefRecord.RTD_TEXT)) {
-                    try {
-                        return readText(ndefRecord);
-                    } catch (UnsupportedEncodingException e) {
-                        Log.e(TAG, "Unsupported Encoding", e);
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private String readText(NdefRecord record) throws UnsupportedEncodingException {
-            /*
-             * See NFC forum specification for "Text Record Type Definition" at 3.2.1
-             *
-             * http://www.nfc-forum.org/specs/
-             *
-             * bit_7 defines encoding
-             * bit_6 reserved for future use, must be 0
-             * bit_5..0 length of IANA language code
-             */
-
-            byte[] payload = record.getPayload();
-
-            // Get the Text Encoding
-            String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16";
-
-            // Get the Language Code
-            int languageCodeLength = payload[0] & 0063;
-
-            // String languageCode = new String(payload, 1, languageCodeLength, "US-ASCII");
-            // e.g. "en"
-
-            // Get the Text
-            return new String(payload, languageCodeLength + 1, payload.length - languageCodeLength - 1, textEncoding);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            if (result != null) {
-                mStateLabel.setText("Read content: " + result);
-            }
-        }
     }
 
     /**
