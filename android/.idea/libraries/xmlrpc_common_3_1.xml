@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="xmlrpc-common-3.1">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/app/libs/xmlrpc-common-3.1.3" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

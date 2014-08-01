@@ -13,6 +13,8 @@
     <string name="state_nfc_disabled">NFC is disabled.</string>
     <string name="state_nothing_selected">Nothing selected</string>
     <string name="state_wrong_tag_type">Tag is written by Fleischlager</string>
+    <string name="erp_url_prefix">http://erp.fablab-karlsruhe.de/xmlrpc</string>
+    <string name="erp_hostname">erp.fablab-karlsruhe.de</string>
 
 
 </resources>

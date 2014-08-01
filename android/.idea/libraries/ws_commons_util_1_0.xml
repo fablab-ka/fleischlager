@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ws-commons-util-1.0">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/app/libs/ws-commons-util-1.0.2" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

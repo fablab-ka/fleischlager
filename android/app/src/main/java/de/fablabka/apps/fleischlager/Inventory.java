@@ -1,8 +1,7 @@
 package de.fablabka.apps.fleischlager;
 
-import android.app.Activity;
-
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.PendingIntent;
@@ -12,40 +11,31 @@ import android.content.IntentFilter;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
-import android.nfc.tech.Ndef;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Message;
 import android.os.Parcelable;
 import android.os.Vibrator;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.ndeftools.Record;
 import org.ndeftools.externaltype.AndroidApplicationRecord;
 import org.ndeftools.wellknown.TextRecord;
-import org.w3c.dom.Text;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
-
-public class Inventory extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+public class Inventory extends Activity implements NavigationDrawerFragment.NavigationDrawerCallbacks, InventoryProvider {
 
     public static final String MIME_TEXT_PLAIN = "text/plain";
     public static final String TAG = "NFC Tag";
@@ -67,6 +57,8 @@ public class Inventory extends Activity
     private PendingIntent nfcPendingIntent;
 
     private TextView mStateLabel;
+    private static InventoryManager inventoryManager;
+    private ArrayList<InventoryManager.Product> products;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +70,10 @@ public class Inventory extends Activity
         mTitle = getTitle();
 
         mStateLabel = (TextView)findViewById(R.id.state_label);
+
+        this.inventoryManager = new InventoryManager("FabLab_Kalsruhe", getResources().getString(R.string.erp_hostname));
+        this.inventoryManager.Login("fabi", "fabi");
+        this.products = this.inventoryManager.GetProducts();
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
@@ -100,7 +96,6 @@ public class Inventory extends Activity
         }
 
         handleIntent(getIntent());
-
     }
 
     @Override
@@ -137,8 +132,6 @@ public class Inventory extends Activity
         String action = intent.getAction();
 
         if (intent.hasExtra(NfcAdapter.EXTRA_TAG)) {
-
-            byte[] byteArrayExtra = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
 
             Parcelable[] messages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
             if (messages != null) {
@@ -237,6 +230,11 @@ public class Inventory extends Activity
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public ArrayList<InventoryManager.Product> getProducts() {
+        return this.products;
+    }
+
     /**
      * A placeholder fragment containing a simple view.
      */
@@ -246,6 +244,7 @@ public class Inventory extends Activity
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private ListView listview_products;
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -263,9 +262,9 @@ public class Inventory extends Activity
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_inventory, container, false);
+            this.listview_products = (ListView)getActivity().findViewById(R.id.listview_products);
             return rootView;
         }
 
@@ -274,7 +273,44 @@ public class Inventory extends Activity
             super.onAttach(activity);
             ((Inventory) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
+
+            ArrayList products = ((InventoryProvider)activity).getProducts();
+            /*
+            final StableArrayAdapter adapter = new StableArrayAdapter(activity, android.R.layout.simple_list_item_1, products);
+            this.listview_products.setAdapter(adapter);
+
+            this.listview_products.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(getActivity(), "Click ListItem Number " + position, Toast.LENGTH_LONG).show();
+                }
+            });*/
+        }
+
+        private class StableArrayAdapter extends ArrayAdapter<String> {
+
+            HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
+
+            public StableArrayAdapter(Context context, int textViewResourceId,
+                                      List<String> objects) {
+                super(context, textViewResourceId, objects);
+                for (int i = 0; i < objects.size(); ++i) {
+                    mIdMap.put(objects.get(i), i);
+                }
+            }
+
+            @Override
+            public long getItemId(int position) {
+                String item = getItem(position);
+                return mIdMap.get(item);
+            }
+
+            @Override
+            public boolean hasStableIds() {
+                return true;
+            }
+
         }
     }
-
 }
+

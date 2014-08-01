@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "de.fablabka.apps.fleischlager"
         minSdkVersion 17
-        targetSdkVersion 20
+        targetSdkVersion 19
         versionCode 1
         versionName "1.0"
     }
@@ -17,6 +17,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
 }
 
 dependencies {
@@ -24,4 +29,8 @@ dependencies {
     // You must install or update the Support Repository through the SDK manager to use this dependency.
     compile 'com.android.support:support-v4:19.+'
     compile files('libs/ndeftools-1.2.3.jar')
+    compile files('libs/xmlrpc-client-3.1.3.jar')
+    compile files('libs/xmlrpc-common-3.1.3')
+    compile files('libs/ws-commons-util-1.0.2')
+    compile files('libs/openerp-java-api-1.4.0.jar')
 }
