@@ -71,7 +71,8 @@ public class InventoryManager {
     {
         ArrayList<Product> result = new ArrayList<Product>();
 
-        Session openERPSession = new Session(this.hostname, 80, this.dbname, this.username, this.password);
+        //Session openERPSession = new Session(this.hostname, 80, this.dbname, this.username, this.password);
+        Session openERPSession = new Session("erp.fablab-karlsruhe.de", 80, "FabLab_Karlsruhe", "fleischlager", "fleischlager");
         try {
             // startSession logs into the server and keeps the user id of the logged in user
             openERPSession.startSession();
@@ -112,29 +113,48 @@ public class InventoryManager {
 
     public class Product
     {
-        private final int id;
-        private final String name;
-        private final String default_code;
-        private final String type;
-        private final String qty_available;
-        private final String loc_case;
-        private final String loc_rack;
-        private final String loc_row;
-        private final String ean13;
-        private final String list_price;
+        private int id = -1;
+        private String name = "";
+        private String default_code = "";
+        private String type = "";
+        private String qty_available = "";
+        private String loc_case = "";
+        private String loc_rack = "";
+        private String loc_row = "";
+        private String ean13 = "";
+        private String list_price = "";
 
         public Product(Row row)
         {
             this.id = row.getID();
-            this.name = row.get("name").toString();
-            this.default_code = row.get("default_code").toString();
-            this.type = row.get("type").toString();
-            this.qty_available = row.get("qty_available").toString();
-            this.loc_case = row.get("loc_case").toString();
-            this.loc_rack = row.get("loc_rack").toString();
-            this.loc_row = row.get("loc_row").toString();
-            this.ean13 = row.get("ean13").toString();
-            this.list_price = row.get("list_price").toString();
+
+            if (row.get("name") != null) {
+                this.name = row.get("name").toString();
+            }
+            if (row.get("default_code") != null) {
+                this.default_code = row.get("default_code").toString();
+            }
+            if (row.get("type") != null) {
+                this.type = row.get("type").toString();
+            }
+            if (row.get("qty_available") != null) {
+                this.qty_available = row.get("qty_available").toString();
+            }
+            if (row.get("loc_case") != null) {
+                this.loc_case = row.get("loc_case").toString();
+            }
+            if (row.get("loc_rack") != null) {
+                this.loc_rack = row.get("loc_rack").toString();
+            }
+            if (row.get("loc_row") != null) {
+                this.loc_row = row.get("loc_row").toString();
+            }
+            if (row.get("ean13") != null) {
+                this.ean13 = row.get("ean13").toString();
+            }
+            if (row.get("list_price") != null) {
+                this.list_price = row.get("list_price").toString();
+            }
         }
 
         public String getList_price() {

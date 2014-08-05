@@ -15,6 +15,11 @@
     <string name="state_wrong_tag_type">Tag is written by Fleischlager</string>
     <string name="erp_url_prefix">http://erp.fablab-karlsruhe.de/xmlrpc</string>
     <string name="erp_hostname">erp.fablab-karlsruhe.de</string>
-
+    <string name="search_hint">Search Inventory</string>
+    <string name="action_search">Search</string>
+    <string name="hostname">Hostname</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="no_products_found">Nothing found</string>
 
 </resources>

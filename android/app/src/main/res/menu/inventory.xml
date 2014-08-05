@@ -1,11 +1,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".Inventory" >
-    <item android:id="@+id/action_refresh"
+
+    <item android:id="@+id/action_search"
+        android:title="@string/action_search"
+        android:icon="@drawable/ic_action_search"
+        android:showAsAction="always"
+        android:actionViewClass="android.widget.SearchView" />
+
+    <!--<item android:id="@+id/action_refresh"
         android:title="@string/action_refresh"
-        android:showAsAction="withText|ifRoom" />
+        android:icon="@drawable/ic_action_refresh"
+        yourapp:showAsAction="withText|ifRoom" />
+
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"
-        android:showAsAction="never" />
+        yourapp:showAsAction="never" />-->
 </menu>
