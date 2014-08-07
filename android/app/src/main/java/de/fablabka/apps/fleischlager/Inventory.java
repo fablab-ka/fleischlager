@@ -14,10 +14,13 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
@@ -217,13 +220,13 @@ public class Inventory extends Activity {
                     adapter.clear();
 
                     if (products.size() > 0)
-
                     {
                         for (InventoryManager.Product p : products) {
-                            adapter.add(p);
+                            if (p.getType().equals("product")) {
+                                adapter.add(p);
+                            }
                         }
                     } else
-
                     {
                         stateLabel.setText(R.string.no_products_found);
                     }
@@ -235,8 +238,11 @@ public class Inventory extends Activity {
     }
 
     private class StableArrayAdapter extends ArrayAdapter<InventoryManager.Product> {
+        private LayoutInflater inflater = null;
+
         public StableArrayAdapter(Context context, int textViewResourceId, List<InventoryManager.Product> objects) {
             super(context, textViewResourceId, objects);
+            inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
@@ -248,6 +254,30 @@ public class Inventory extends Activity {
         @Override
         public boolean hasStableIds() {
             return true;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View vi=convertView;
+            if(convertView == null) {
+                vi = inflater.inflate(R.layout.product_list_item, null);
+            }
+
+            TextView title = (TextView)vi.findViewById(R.id.product_row_title);
+            TextView description = (TextView)vi.findViewById(R.id.product_row_description);
+            TextView location = (TextView)vi.findViewById(R.id.product_row_location);
+            ImageView icon = (ImageView)vi.findViewById(R.id.product_row_icon);
+
+            InventoryManager.Product item = getItem(position);
+
+            String name = item.getName();
+            title.setText(name);
+            description.setText(item.getDefault_code());
+            //location.setText(item.getLocation());
+
+            //decide icon by item.getType()
+            //TODO icon.setImage();
+            return vi;
         }
     }
 }

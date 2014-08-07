@@ -12,7 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:textColor="#fff"/>
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -27,7 +28,6 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:visibility="gone">
-            <!--android:indeterminateDrawable="@drawable/progress"-->
         </ProgressBar>
     </LinearLayout>
 
@@ -35,7 +35,6 @@
         android:id="@+id/listview_products"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/state_label"
         android:listSelector="@drawable/product_list_selector"
         ></ListView>
 

@@ -22,7 +22,7 @@ public class InventoryManager {
         this.dbname = dbname;
         this.hostname = hostname;
 
-        this.relevantProductFields = new String[] { "name", "default_code", "type", "qty_available", "loc_case", "loc_rack", "loc_row", "ean13", "list_price" };
+        this.relevantProductFields = new String[] { "name", "description", "categ_id", "default_code", "type", "qty_available", "loc_case", "loc_rack", "loc_row", "ean13", "list_price" };
         this.relevantUserFields = new String[] { "name" };
     }
 
@@ -195,6 +195,10 @@ public class InventoryManager {
 
         public int getId() {
             return id;
+        }
+
+        public String getLocation() {
+            return this.getLoc_rack() + " " + this.getLoc_row() + " " + this.getLoc_case();
         }
     }
 
